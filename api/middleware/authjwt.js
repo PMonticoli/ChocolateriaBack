@@ -34,3 +34,11 @@ esEmpleado = async (req, res, next) => {
         res.status(403).json({ "ok": false, "mensaje": "Usted no tiene los permisos requeridos para acceder a este recurso." });
     }
 };
+
+const authJwt = {
+    verifyToken,
+    invalidTokenCheck,
+    esEmpleado
+  };
+  
+  module.exports = authJwt;
