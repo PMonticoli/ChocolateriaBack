@@ -180,6 +180,99 @@ router.get('/',
     (req, res) => {
 
         mysqlConnection.query('call spObtenerPedidos();',
+            (err, rows, fields) => {mysqlConnection
+                if (!err) {
+                    res.status(200).json({ "ok": true, "resultado": rows[0] });
+                } else {
+                    res.status(500).json({ "ok": false, "mensaje": "Error al listar pedidos" })
+                    console.log(err);
+                }
+            })
+    });
+
+router.get('/detalles/:id',
+    [authJwt.verifyToken,
+    authJwt.invalidTokenCheck],
+    (req, res) => {
+
+        mysqlConnection.query('call spObtenerDetalles(?);', [req.params['id']],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(200).json({ "ok": true, "resultado": rows[0] });
+                } else {
+                    res.status(500).json({ "ok": false, "mensaje": "Error al listar los detalles de pedido" })
+                    console.log(err);
+                }
+            })
+    });
+router.get('/pendientes',
+    [authJwt.verifyToken,
+    authJwt.invalidTokenCheck,
+    authJwt.esEmpleado],
+    (req, res) => {
+        mysqlConnection.query('call spObtenerPedidosPendientes();',
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(200).json({ "ok": true, "resultado": rows[0] });
+                } else {
+                    res.status(500).json({ "ok": false, "mensaje": "Error al listar pedidos" })
+                    console.log(err);
+                }
+            })
+    });
+router.put('/estado',
+    [authJwt.verifyToken,
+    authJwt.invalidTokenCheck,
+    authJwt.esEmpleado],
+    (req, res) => {
+
+        const { idEstado, idPedido } = req.body;
+        mysqlConnection.query('call spActualizarEstadoPedido(?,?)', [idEstado, idPedido],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(201).json({
+                        "ok": true,
+                        "mensaje": "Estado del pedido actualizado con éxito"
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al actualizar estado de pedido"
+                    });
+                }
+            });
+    });
+
+router.get('/propios',
+    [authJwt.verifyToken,
+    authJwt.invalidTokenCheck],
+    (req, res) => {
+        if (!req.data.idSocio) {
+            res.status(403).json({ "ok": false, "mensaje": "Usted no posee los permisos requeridos para acceder a este recurso." });
+            return;
+        }
+        mysqlConnection.query('call spObtenerMisPedidos(?);',
+            [req.data.idSocio],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(200).json({ "ok": true, "resultado": rows[0] });
+                } else {
+                    res.status(500).json({ "ok": false, "mensaje": "Error al listar pedidos" })
+                    console.log(err);
+                }
+            })
+    });
+
+router.get('/:id',
+    [
+        authJwt.verifyToken,
+        authJwt.invalidTokenCheck,
+        authJwt.esEmpleado
+    ],
+    (req, res) => {
+
+        mysqlConnection.query('call spObtenerPedidoPorId(?);', [req.params['id']],
             (err, rows, fields) => {
                 if (!err) {
                     res.status(200).json({ "ok": true, "resultado": rows[0] });
