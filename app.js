@@ -18,4 +18,7 @@ app.use('/productos',productoRoute);
 const pedidoRoute = require('./api/routes/pedido');
 app.use('/pedidos',pedidoRoute);
 
+const estadoPedidoRoute = require('./api/routes/estadoPedido');
+app.use('/estadosPedido',estadoPedidoRoute);
+
 module.exports = app;
