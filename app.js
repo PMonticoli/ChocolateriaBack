@@ -21,4 +21,7 @@ app.use('/pedidos',pedidoRoute);
 const estadoPedidoRoute = require('./api/routes/estadoPedido');
 app.use('/estadosPedido',estadoPedidoRoute);
 
+const cobroRoute = require('./api/routes/cobro');
+app.use('/cobros', cobroRoute);
+
 module.exports = app;
