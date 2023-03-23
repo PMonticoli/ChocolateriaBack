@@ -24,4 +24,7 @@ app.use('/estadosPedido',estadoPedidoRoute);
 const cobroRoute = require('./api/routes/cobro');
 app.use('/cobros', cobroRoute);
 
+const tiposPagosRoute = require('./api/routes/tipoPago');
+app.use('/tiposPago',tiposPagosRoute);
+
 module.exports = app;
