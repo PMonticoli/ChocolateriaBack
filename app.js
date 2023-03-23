@@ -21,10 +21,10 @@ app.use('/pedidos',pedidoRoute);
 const estadoPedidoRoute = require('./api/routes/estadoPedido');
 app.use('/estadosPedido',estadoPedidoRoute);
 
-const cobroRoute = require('./api/routes/cobro');
-app.use('/cobros', cobroRoute);
-
 const tiposPagosRoute = require('./api/routes/tipoPago');
 app.use('/tiposPago',tiposPagosRoute);
+
+const cobroRoute = require('./api/routes/cobro');
+app.use('/cobros', cobroRoute);
 
 module.exports = app;
