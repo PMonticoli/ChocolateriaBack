@@ -27,4 +27,7 @@ app.use('/tiposPago',tiposPagosRoute);
 const cobroRoute = require('./api/routes/cobro');
 app.use('/cobros', cobroRoute);
 
+const socioRoute = require('./api/routes/socio');
+app.use('/socios',socioRoute);
+
 module.exports = app;
