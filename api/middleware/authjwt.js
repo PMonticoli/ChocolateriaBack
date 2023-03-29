@@ -51,12 +51,30 @@ checkIdSocio = async (req, res, next) => {
     }
 };
 
+checkIdUsuario = async (req, res, next) => {
+    if (req.data.id == req.params['id'] || req.data.rol === 'Admin'){
+        return next();
+    } else {
+        res.status(403).json({ "ok": false, "mensaje": "Usted no tiene los permisos requeridos para acceder a este recurso." });
+    }
+};
+
+checkIdUsuarioOrEmpleado= async(req,res,next) =>{
+    if (req.data.id == req.params['id'] || req.data.rol === 'Admin' || req.data.rol === 'Empleado'){
+        return next();
+    } else {
+        res.status(403).json({ "ok": false, "mensaje": "Usted no tiene los permisos requeridos para acceder a este recurso." });
+    }
+}
+
 const authJwt = {
     verifyToken,
     invalidTokenCheck,
     esAdmin,
     esEmpleado,
-    checkIdSocio
+    checkIdSocio,
+    checkIdUsuario,
+    checkIdUsuarioOrEmpleado
   };
   
   module.exports = authJwt;
