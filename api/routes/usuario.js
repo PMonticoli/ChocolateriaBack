@@ -7,15 +7,33 @@ const mysqlConnection = require('../connection/connection');
 
 const jwt = require('jsonwebtoken');
 
-router.get('/', (req,res) => {
-mysqlConnection.query('select * from usuarios',(err,rows,fields)=> {
-if(!err){
-res.json(rows);
-}else {
-console.log(err);
-}
-})
-});
+router.get('/',
+    [authJwt.verifyToken,
+    authJwt.invalidTokenCheck,
+    authJwt.esAdmin], (req, res) => {
+
+        mysqlConnection.query('select u.id, r.nombre as rol,' +
+            ' u.usuario, u.fechaAlta, u.fechaBaja FROM usuarios u' +
+            ' join roles r on r.id = u.idRol;',
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(200).json({ "ok": true, "resultado": rows });
+                } else {
+                    res.status(500).json({ "ok": false, "mensaje": "Error al intentar listar usuarios" })
+                    console.log(err);
+                }
+            })
+    });
+router.get('/rol',
+    [
+        authJwt.verifyToken,
+        authJwt.invalidTokenCheck
+    ], (req, res) => {
+        res.status(200).json({
+            "ok": true,
+            resultado: [req.data.rol]
+        });
+    });
 
 
 router.post('/iniciarSesion', (req, res) => {
