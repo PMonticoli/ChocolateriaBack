@@ -63,4 +63,30 @@ router.post('/iniciarSesion', (req, res) => {
     );
 });
 
+router.post('/nuevoUsuarioSocio', (req, res) => {
+    const { usuario, contrasenia, dni } = req.body;
+    mysqlConnection.query('call spNuevoUsuarioSocio(?, ?, ?)', [usuario, contrasenia, dni],
+        (err, rows, fields) => {
+            if (rows.affectedRows < 1) {
+                res.status(400).json({
+                    "ok": false,
+                    "mensaje": "Ya existe un usuario con el dni especificado"
+                });
+                return;
+            }
+            if (!err) {
+                res.status(201).json({
+                    "ok": true,
+                    "mensaje": "Usuario creado con éxito"
+                });
+            } else {
+                console.log(err);
+                res.status(500).json({
+                    "ok": false,
+                    "mensaje": "Error al crear usuario"
+                });
+            }
+        });
+});
+
 module.exports = router;
