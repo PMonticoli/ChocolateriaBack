@@ -27,6 +27,14 @@ invalidTokenCheck = async (req, res, next) => {
     }
 };
 
+esAdmin = async (req, res, next) => {
+    if (req.data.rol === 'Admin'){
+        return next();
+    } else {
+        res.status(403).json({ "ok": false, "mensaje": "Usted no tiene los permisos requeridos para acceder a este recurso." });
+    }
+};
+
 esEmpleado = async (req, res, next) => {
     if (req.data.rol === 'Empleado' || req.data.rol === 'Admin'){
         return next();
@@ -46,6 +54,7 @@ checkIdSocio = async (req, res, next) => {
 const authJwt = {
     verifyToken,
     invalidTokenCheck,
+    esAdmin,
     esEmpleado,
     checkIdSocio
   };
