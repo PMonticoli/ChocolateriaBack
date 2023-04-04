@@ -159,4 +159,32 @@ authJwt.esEmpleado],
     });
 });
 
+router.post('/canjear',
+    [
+        authJwt.verifyToken,
+        authJwt.invalidTokenCheck
+    ], (req, res) => {
+        if (!req.data.idSocio) {
+            res.status(403).json({ 
+            "ok": false,
+            "mensaje": "Usted no posee los permisos requeridos para acceder a este recurso" });
+            return;
+        }
+        mysqlConnection.query('call spCanjearPuntos(?,?)', [req.body.id, req.data.idSocio],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(201).json({
+                        "ok": true,
+                        "mensaje": "Canjeo la promoción con éxito"
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al intentar realizar el canje de promoción"
+                    });
+                }
+            });
+    });
+
 module.exports = router;    
