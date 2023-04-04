@@ -5,23 +5,20 @@ const authJwt = require('../middleware/authjwt');
 
 const mysqlConnection = require('../connection/connection');
 
-
 router.get('/',
-[authJwt.invalidTokenCheck,
-    authJwt.verifyToken,
-    authJwt.esEmpleado],
-    (req,res)=>{
+    [authJwt.verifyToken,
+    authJwt.invalidTokenCheck,
+    authJwt.esEmpleado], (req, res) => {
         mysqlConnection.query('call spObtenerPromociones();',
-        (err,rows,fields)=>{
-            if(!err){
-                res.status(201).json({"ok":true, "resultado": rows[0]})
-            } else{
-                res.status(500).json({ "ok": false, "mensaje": "Error al listar promociones" })
-                console.log(err);
-            }
-        })
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(200).json({ "ok": true, "resultado": rows[0] })
+                } else {
+                    res.status(500).json({ "ok": false, "mensaje": "Error al listar promociones" })
+                    console.log(err);
+                }
+            })
     });
-
 
     router.get('/detalles/:id',
     (req, res) => {
