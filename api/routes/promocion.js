@@ -1,0 +1,162 @@
+const express = require('express');
+const app = require('../../app');
+const router = express.Router();
+const authJwt = require('../middleware/authjwt');
+
+const mysqlConnection = require('../connection/connection');
+
+
+router.get('/',
+[authJwt.invalidTokenCheck,
+    authJwt.verifyToken,
+    authJwt.esEmpleado],
+    (req,res)=>{
+        mysqlConnection.query('call spObtenerPromociones();',
+        (err,rows,fields)=>{
+            if(!err){
+                res.status(201).json({"ok":true, "resultado": rows[0]})
+            } else{
+                res.status(500).json({ "ok": false, "mensaje": "Error al listar promociones" })
+                console.log(err);
+            }
+        })
+    });
+
+
+    router.get('/detalles/:id',
+    (req, res) => {
+        mysqlConnection.query('call spObtenerDetallesPromocion(?);', [req.params['id']],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(200).json({ "ok": true, "resultado": rows[0] });
+                } else {
+                    res.status(500).json({ "ok": false, "mensaje": "Error al listar detalles de promocion" })
+                    console.log(err);
+                }
+            })
+    });
+
+
+router.post('/',
+    [authJwt.verifyToken,
+    authJwt.invalidTokenCheck,
+    authJwt.esEmpleado],
+    async (req, res) => {
+
+        const { nombre, descripcion, precioPuntos, detalles, fechaDesde, fechaHasta } = req.body;
+        await mysqlConnection.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+        await mysqlConnection.beginTransaction();
+        mysqlConnection.query('call spRegistrarPromocion(?,?,?,?,?,@id); select @id as id;',
+            [nombre, descripcion, precioPuntos, new Date(fechaDesde), new Date(fechaHasta)],
+            async (err, rows, fields) => {
+                if (!err) {
+                    const idPromocion = rows[1][0].id;
+                    try {
+                        for (const det of detalles) {
+                            const { producto, cantidad } = det;
+                            mysqlConnection.query('call spRegistrarDetallePromocion(?,?,?);', 
+                            [idPromocion, producto.id, cantidad],
+                                async (err, rows, fields) => {
+                                    if (err) {
+                                        console.error(err);
+                                        console.log("rollback");
+                                        mysqlConnection.rollback(); //revierto los cambios
+                                        res.status(500).json({
+                                            "ok": false,
+                                            "mensaje": "Error al registrar promocion"
+                                        });
+                                        return;
+                                    }
+                                });
+                        }
+                        res.status(201).json({
+                            "ok": true,
+                            "mensaje": "Promocion registrada con éxito"
+                        });
+                        await mysqlConnection.commit();
+                    }
+                    catch (e) {
+                        console.error(e);
+                        console.log("rollback");
+                        res.status(500).json({
+                            "ok": false,
+                            "mensaje": "Error al registrar promocion"
+
+                        });
+                        await mysqlConnection.rollback();
+                    }
+
+                } else {
+                    console.log(err);
+                    console.log("rollback");
+                    mysqlConnection.rollback();
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al registrar promocion"
+
+                    });
+                }
+            });
+    });
+
+
+router.get('/vigentes', (req, res) => {
+    mysqlConnecction.query('call spObtenerPromocionesVigentes();',
+        (err, rows, fields) => {
+            if (!err) {
+                res.status(200).json({ "ok": true, "resultado": rows[0]});
+            } else {
+                res.status(500).json({"ok": false, "mensaje": "Error al listar promociones vigentes" })
+                console.log(err);
+                }
+            })
+    });
+
+    router.put('/',
+    [
+        authJwt.verifyToken,
+        authJwt.invalidTokenCheck,
+        authJwt.esEmpleado
+    ],
+    (req, res) => {
+        const { id, nombre, descripcion, precioPuntos, fechaDesde, fechaHasta } = req.body;
+        mysqlConnection.query('call spEditarPromocion(?,?,?,?,?,?)', 
+        [id, nombre, descripcion, precioPuntos, new Date(fechaDesde), new Date(fechaHasta)],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(201).json({
+                        "ok": true,
+                        "mensaje": "Promocion actualizada con éxito"
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al intentar actualizar promoción"
+                    });
+                }
+            });
+    });
+
+router.delete('/:id', 
+[authJwt.verifyToken, 
+authJwt.invalidTokenCheck, 
+authJwt.esEmpleado],
+(req,res)=>{
+    mysqlConnection.query('call spFinalizarPromocion(?);',[req.params['id']],
+    (err,rows,fields)=>{
+        if(!err){
+            res.status(200).json({
+            "ok": true,
+            "mensaje": "Promoción finalizada con éxito"});
+        }else{
+            console.log(err);
+            res.status(500).json({
+                "ok": false,
+                "mensaje": "Error al finalizar promoción"
+            });
+        }
+    });
+});
+
+module.exports = router;    

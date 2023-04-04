@@ -265,32 +265,6 @@ router.get('/propios',
     });
 
 
-    router.post('/fecha',
-    [
-        authJwt.verifyToken,
-        authJwt.invalidTokenCheck,
-        authJwt.esEmpleado
-    ], (req, res) => {
-        const { fechaDesde, fechaHasta } = req.body;
-        mysqlConnection.query('call spObtenerPedidosPorFecha(?,?)', 
-        [new Date(fechaDesde), new Date(fechaHasta)],
-            (err, rows, fields) => {
-                if (!err) {
-                    res.status(200).json({
-                        "ok": true,
-                        "mensaje": "Listado filtrado por fecha generado con éxito",
-                        "resultado": rows[0]
-                    });
-                } else {
-                    console.log(err);
-                    res.status(500).json({
-                        "ok": false,
-                        "mensaje": "Error al generar listado por fecha"
-                    });
-                }
-            });        
-});
-
 router.get('/:id',
     [
         authJwt.verifyToken,
