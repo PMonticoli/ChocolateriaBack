@@ -98,7 +98,7 @@ router.post('/',
 
 
 router.get('/disponibles', (req, res) => {
-    mysqlConnecction.query('call spObtenerPromocionesDisponibles();',
+    mysqlConnection.query('call spObtenerPromocionesDisponibles();',
         (err, rows, fields) => {
             if (!err) {
                 res.status(200).json({ "ok": true, "resultado": rows[0]});
