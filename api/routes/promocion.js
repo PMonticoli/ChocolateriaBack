@@ -97,13 +97,13 @@ router.post('/',
     });
 
 
-router.get('/vigentes', (req, res) => {
-    mysqlConnecction.query('call spObtenerPromocionesVigentes();',
+router.get('/disponibles', (req, res) => {
+    mysqlConnecction.query('call spObtenerPromocionesDisponibles();',
         (err, rows, fields) => {
             if (!err) {
                 res.status(200).json({ "ok": true, "resultado": rows[0]});
             } else {
-                res.status(500).json({"ok": false, "mensaje": "Error al listar promociones vigentes" })
+                res.status(500).json({"ok": false, "mensaje": "Error al listar promociones disponibles" })
                 console.log(err);
                 }
             })
