@@ -125,4 +125,28 @@ router.delete('/:id',
             });
     });
 
+    router.put('/stock',
+    [authJwt.verifyToken,
+    authJwt.invalidTokenCheck,
+    authJwt.esEmpleado],
+    (req, res) => {
+        const { id, stock } = req.body;
+        mysqlConnection.query('call spActualizarStock(?, ?)', [id, stock],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(201).json({
+                        "ok": true,
+                        "mensaje": "Stock producto actualizado con éxito"
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al actualizar stock producto"
+                    });
+                }
+            });
+    });
+
+
     module.exports = router;
