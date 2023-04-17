@@ -38,6 +38,7 @@ router.get('/activos'
                 }
             })
     });
+    
 router.get('/:id',
     [authJwt.verifyToken,
     authJwt.invalidTokenCheck,
