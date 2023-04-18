@@ -100,18 +100,26 @@ router.post("/",[authJwt.verifyToken, authJwt.invalidTokenCheck],(req, res) => {
 router.post("/sinLogin", async (req, res) => {
   idPuntoVenta = 2;
   const { detalles, observaciones } = req.body;
-  await mysqlConnection.query("SET TRANSACTION ISOLATION LEVEL READ COMMITTED");
-  await mysqlConnection.beginTransaction();
-  console.log("Results:", results);
-  mysqlConnection.query(
-    "call spRegistrarPedido(?,?,?,?,@id); select @id as id;",
-    [idPuntoVenta, null, null, observaciones],
-    async (err, rows, fields) => {
-      if (!err) {
-        const idPedido = rows[1][0].id;
+  let idPedido;
 
-        try {
-          for (const detalle of detalles) {
+    mysqlConnection.beginTransaction((err) => {
+      if (err) throw err;
+
+      const queryPedido = `CALL spRegistrarPedido(?, ?, ?, ?, @id); SELECT @id as id;`;
+
+      mysqlConnection.query(
+        queryPedido,
+        [idPuntoVenta, null, null, observaciones],
+        (err, results) => {
+          if (err) {
+            return mysqlConnection.rollback(() => {
+              throw err;
+            });
+          }
+
+          idPedido = results[1][0].id;
+
+          detalles.forEach((detalle) => {
             const {
               producto,
               cantidad,
@@ -119,8 +127,11 @@ router.post("/sinLogin", async (req, res) => {
               puntosGanados,
               comentarios,
             } = detalle;
+
+            const queryDetalle = `CALL spRegistrarDetallePedido(?, ?, ?, ?, ?, ?);`;
+
             mysqlConnection.query(
-              "call spRegistrarDetallePedido(?,?,?,?,?,?);",
+              queryDetalle,
               [
                 idPedido,
                 producto.id,
@@ -129,46 +140,34 @@ router.post("/sinLogin", async (req, res) => {
                 puntosGanados,
                 comentarios,
               ],
-              async (err, rows, fields) => {
+              (err, results) => {
                 if (err) {
-                  console.error(err);
-                  console.log("rollback");
-                  mysqlConnection.rollback();
-                  res.status(500).json({
-                    ok: false,
-                    mensaje: "Error al registrar pedido",
+                  return mysqlConnection.rollback(() => {
+                    if (err) {
+                    res.status(500).json({ "ok": false, "mensaje": "Stock insuficiente para realizar el pedido" })
+                    console.log(err);
+                }
                   });
-                  return;
                 }
               }
             );
-          }
-          res.status(201).json({
-            ok: true,
-            mensaje: "Pedido generado con éxito",
           });
-          await mysqlConnection.commit();
-        } catch (e) {
-          console.error(e);
-          console.log("rollback");
-          res.status(500).json({
-            ok: false,
-            mensaje: "Error al registrar pedido",
+
+          mysqlConnection.commit((err) => {
+            if (err) {
+              return mysqlConnection.rollback(() => {
+                throw err;
+              });
+            }
+
+            res.send({ idPedido, message: "Pedido registrado correctamente" });
           });
-          await mysqlConnection.rollback();
         }
-      } else {
-        console.log(err);
-        console.log("rollback");
-        mysqlConnection.rollback();
-        res.status(500).json({
-          ok: false,
-          mensaje: "Error al registrar pedido",
-        });
-      }
-    }
-  );
-});
+      );
+    });
+  }
+);
+
 router.delete(
   "/:id",
   [authJwt.verifyToken, authJwt.invalidTokenCheck],
