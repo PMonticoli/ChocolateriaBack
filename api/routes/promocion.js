@@ -20,18 +20,27 @@ router.get('/',
             })
     });
 
-    router.get('/detalles/:id',
-    (req, res) => {
-        mysqlConnection.query('call spObtenerDetallesPromocion(?);', [req.params['id']],
+    router.get(
+        "/detalles/:id",
+        [authJwt.verifyToken, authJwt.invalidTokenCheck],
+        (req, res) => {
+          mysqlConnection.query(
+            "call spObtenerDetallesPromocion(?);",
+            [req.params["id"]],
             (err, rows, fields) => {
-                if (!err) {
-                    res.status(200).json({ "ok": true, "resultado": rows[0] });
-                } else {
-                    res.status(500).json({ "ok": false, "mensaje": "Error al listar detalles de promocion" })
-                    console.log(err);
-                }
-            })
-    });
+              if (!err) {
+                res.status(200).json({ ok: true, resultado: rows[0] });
+              } else {
+                res.status(500).json({
+                  ok: false,
+                  mensaje: "Error al listar los detalles de promocion",
+                });
+                console.log(err);
+              }
+            }
+          );
+        }
+      );
 
 
 router.post('/',
