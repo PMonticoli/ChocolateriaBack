@@ -8,6 +8,9 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // RUTAS
 const usuarioRoute = require('./api/routes/usuario');
 app.use('/usuarios',usuarioRoute);

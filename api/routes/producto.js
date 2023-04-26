@@ -8,6 +8,49 @@ const mysqlConnection = require('../connection/connection');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+const multer = require('multer');
+const path = require('path');
+const UPLOADS_FOLDER = '/uploads/';
+const storage = multer.diskStorage({
+    destination: (req, file, callBack) => {
+        callBack(null, './uploads')
+    },
+    filename: (req, file, callBack) => {
+        const ext = file.originalname.split('.').pop()
+        const fileName = `${Date.now()}.${ext}`
+        console.log('Nombre de archivo generado:', fileName)
+        callBack(null, fileName.replace(/\\/g, '/'));
+    }
+})
+const upload = multer({ storage })
+
+
+router.post('/uploadImage', upload.single('file'), 
+    (req, res) => {
+    const file = req.file;
+    const urlImagen = UPLOADS_FOLDER + file.filename;     
+    console.log('URL de imagen generada:', urlImagen);
+    (err)=>{
+        if (!err) {
+            res.status(201).json({
+                "ok": true,
+                "mensaje": "Imagen producto agregada con éxito",
+                "urlImagen": urlImagen
+            });
+        } else {
+            console.log(err);
+            res.status(500).json({
+                "ok": false,
+                "mensaje": "Error al agregar Imagen producto"
+            });
+        }
+    }
+    res.send(file);
+
+});
+
+
+
 // Todos los activos o no activos, para empleados
 router.get('/',
     [authJwt.verifyToken,
