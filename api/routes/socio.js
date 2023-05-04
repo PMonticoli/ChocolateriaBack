@@ -229,4 +229,30 @@ router.put('/',
             });    
     });
 
+
+    
+router.get('/reportePuntos/:limite', 
+[authJwt.verifyToken, authJwt.invalidTokenCheck, authJwt.esEmpleado], (req, res) => {
+
+    mysqlConnection.query('call spSociosConMasPuntos(?)', 
+    [req.params['limite']],
+        (err, rows, fields) => {
+            if (!err) {
+                res.status(200).json({
+                    "ok": true,
+                    "resultado": rows[0],
+                    "mensaje": "Socios con más puntos listados con éxito"
+                });
+            } else {
+                console.log(err);
+                res.status(500).json({
+                    "ok": false,
+                    "mensaje": "Error al intentar generar listado de socios"
+                });
+            }
+        });
+
+});
+
+
 module.exports = router;    
