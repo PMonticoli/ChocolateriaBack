@@ -205,4 +205,28 @@ router.put('/',
             });
     });
 
+
+    router.post('/pedidos', 
+    [authJwt.verifyToken, authJwt.invalidTokenCheck, authJwt.esEmpleado], 
+    (req, res) => {
+        const { fechaDesde, fechaHasta } = req.body;
+        mysqlConnection.query('call spCantPedidosPeriodo(?, ?)', 
+        [new Date(fechaDesde), new Date(fechaHasta)],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(201).json({
+                        "ok": true,
+                        "resultado": rows[0],
+                        "mensaje": "Reporte de socios cantidad de pedidos generado con éxito"
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al generar reporte socio"
+                    });
+                }
+            });    
+    });
+
 module.exports = router;    
