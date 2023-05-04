@@ -161,4 +161,48 @@ router.put('/',
         }
     });
 
+    router.post('/nuevos', 
+    [authJwt.verifyToken, authJwt.invalidTokenCheck, authJwt.esEmpleado],
+    (req, res) => {    
+        const { fechaDesde, fechaHasta } = req.body;
+        mysqlConnection.query('call spSociosNuevos(?,?)', [new Date(fechaDesde), new Date(fechaHasta)],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(201).json({
+                        "ok": true,
+                        "resultado": rows[0],
+                        "mensaje": "Reporte cantidad de socios nuevos generado con éxito"
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al generar reporte socios nuevos"
+                    });
+                }
+            });
+    });
+
+    router.post('/bajas', 
+    [authJwt.verifyToken, authJwt.invalidTokenCheck, authJwt.esEmpleado],
+    (req, res) => {    
+        const { fechaDesde, fechaHasta } = req.body;
+        mysqlConnection.query('call spSociosBaja(?,?)', [new Date(fechaDesde), new Date(fechaHasta)],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(201).json({
+                        "ok": true,
+                        "resultado": rows[0],
+                        "mensaje": "Reporte cantidad de socios dados de baja generado con éxito"
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al generar reporte socios dados de baja"
+                    });
+                }
+            });
+    });
+
 module.exports = router;    
