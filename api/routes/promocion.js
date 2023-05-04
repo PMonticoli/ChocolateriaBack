@@ -66,7 +66,7 @@ router.post('/',
                                     if (err) {
                                         console.error(err);
                                         console.log("rollback");
-                                        mysqlConnection.rollback(); //revierto los cambios
+                                        mysqlConnection.rollback();
                                         res.status(500).json({
                                             "ok": false,
                                             "mensaje": "Error al registrar promocion"
@@ -198,13 +198,11 @@ router.post('/canjear',
         authJwt.invalidTokenCheck,
         authJwt.esEmpleado],
     (req, res) => {
-        // Llamar al procedimiento almacenado 'spObtenerPromocionesCanjeadas'
         mysqlConnection.query('CALL spObtenerPromocionesCanjeadas()', (error, results, fields) => {
           if (error) {
             console.log(error);
             res.status(500).send('Error al obtener las promociones canjeadas');
           } else {
-            // Comprobar si la respuesta es un objeto y envolverla en una matriz si es necesario
             const promocionesCanjeadas = Array.isArray(results[0]) ? results[0] : [results[0]];
             res.json(promocionesCanjeadas);
           }

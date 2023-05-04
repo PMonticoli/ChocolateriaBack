@@ -2,9 +2,7 @@ const express = require('express');
 const app = require('../../app');
 const router = express.Router();
 const authJwt = require('../middleware/authjwt');
-
 const mysqlConnection = require('../connection/connection');
-
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 

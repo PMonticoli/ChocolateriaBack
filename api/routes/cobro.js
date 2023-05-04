@@ -1,10 +1,8 @@
 const express = require('express');
 const app = require('../../app');
 const router = express.Router();
-const authJwt = require('../middleware/authjwt');
-
 const mysqlConnection = require('../connection/connection');
-
+const authJwt = require('../middleware/authjwt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -39,7 +37,7 @@ router.post('/',
                             }
                         });
                 } else {
-                    res.status(403).json({ "ok": false, "mensaje": "Usted no tiene los permisos requeridos para acceder a este recurso." });
+                    res.status(403).json({ "ok": false, "mensaje": "Usted no posee los permisos requeridos para acceder a este recurso." });
                 }
             });
 

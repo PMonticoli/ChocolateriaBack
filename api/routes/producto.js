@@ -4,10 +4,11 @@ const router = express.Router();
 const authJwt = require('../middleware/authjwt');
 
 const mysqlConnection = require('../connection/connection');
-
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+
+// MULTER PARA MANEJAR LAS IMG PRODUCTOS
 const multer = require('multer');
 const path = require('path');
 const UPLOADS_FOLDER = '/uploads/';
@@ -50,8 +51,6 @@ router.post('/uploadImage', upload.single('file'),
 });
 
 
-
-// Todos los activos o no activos, para empleados
 router.get('/',
     [authJwt.verifyToken,
     authJwt.invalidTokenCheck,
@@ -68,7 +67,8 @@ router.get('/',
                 }
             })
     });
-// Otener todos los activos o no activos =>  EMPLEADOS
+
+    
 router.get('/activos'
     , (req, res) => {
         mysqlConnection.query('call spObtenerProductosActivos();',
@@ -192,7 +192,7 @@ router.delete('/:id',
             });
     });
 
-    router.post('/reporte',
+    router.post('/reporteProductos',
     [
         authJwt.verifyToken,
         authJwt.invalidTokenCheck,
