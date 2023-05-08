@@ -210,4 +210,28 @@ router.post('/canjear',
       });
 
 
+      router.post('/reportePromocion', 
+      [authJwt.verifyToken, authJwt.invalidTokenCheck, authJwt.esEmpleado], 
+      (req, res) => {
+          const { fechaDesde, fechaHasta } = req.body;
+          mysqlConnection.query('call spReportePromociones(?, ?)', 
+          [new Date(fechaDesde), new Date(fechaHasta)],
+              (err, rows, fields) => {
+                  if (!err) {
+                      res.status(201).json({
+                          "ok": true,
+                          "resultado": rows[0],
+                          "mensaje": "Reporte de promociones generado con éxito"
+                      });
+                  } else {
+                      console.log(err);
+                      res.status(500).json({
+                          "ok": false,
+                          "mensaje": "Error al generar reporte promociones"
+                      });
+                  }
+              });    
+      });
+
+
 module.exports = router;    
