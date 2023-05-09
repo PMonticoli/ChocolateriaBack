@@ -124,28 +124,78 @@ router.post('/',
             });
     });
 
-router.put('/',
+// router.put('/',
+//     [authJwt.verifyToken,
+//     authJwt.invalidTokenCheck,
+//     authJwt.esEmpleado],
+//     (req, res) => {
+//         const { id, nombre, precio, descripcion, observaciones, activo, disponible,puntosGanados, urlImagen } = req.body;
+//         mysqlConnection.query('call spActualizarProducto(?,?,?,?,?,?,?,?,?)', [id, nombre, precio, descripcion, observaciones, activo, disponible,puntosGanados, urlImagen],
+//             (err, rows, fields) => {
+//                 if (!err) {
+//                     res.status(201).json({
+//                         "ok": true,
+//                         "mensaje": "Producto actualizado con éxito"
+//                     });
+//                 } else {
+//                     console.log(err);
+//                     res.status(500).json({
+//                         "ok": false,
+//                         "mensaje": "Error al actualizar producto"
+//                     });
+//                 }
+//             });
+//     });
+
+    router.put('/',
     [authJwt.verifyToken,
     authJwt.invalidTokenCheck,
     authJwt.esEmpleado],
-    (req, res) => {
-        const { id, nombre, precio, descripcion, observaciones, activo, disponible,puntosGanados, urlImagen } = req.body;
-        mysqlConnection.query('call spActualizarProducto(?,?,?,?,?,?,?,?,?)', [id, nombre, precio, descripcion, observaciones, activo, disponible,puntosGanados, urlImagen],
-            (err, rows, fields) => {
-                if (!err) {
-                    res.status(201).json({
-                        "ok": true,
-                        "mensaje": "Producto actualizado con éxito"
-                    });
-                } else {
-                    console.log(err);
-                    res.status(500).json({
-                        "ok": false,
-                        "mensaje": "Error al actualizar producto"
-                    });
+    upload.single('file'), // agregar middleware de multer para subir imagen actualizada
+    async (req, res) => {
+        const { id, nombre, precio, descripcion, observaciones, activo, disponible, puntosGanados } = req.body;
+        const file = req.file; // obtener archivo de imagen actualizado
+
+        mysqlConnection.query('SELECT urlImagen FROM Productos WHERE id = ?', [id], (err, rows, fields) => {
+            if (!err) {
+                const urlImagenAntigua = rows[0].urlImagen;
+                let urlImagenNueva = urlImagenAntigua;
+
+                if (file) {
+                    // si se ha subido una imagen actualizada, eliminar la imagen antigua y guardar la nueva imagen
+                    if (urlImagenAntigua && urlImagenAntigua !== '') {
+                        const filePath = path.join(__dirname, '../uploads', urlImagenAntigua);
+                        fs.unlinkSync(filePath);
+                    }
+
+                    urlImagenNueva = UPLOADS_FOLDER + file.filename;
                 }
-            });
+
+                mysqlConnection.query('CALL spActualizarProducto(?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, nombre, precio, descripcion, observaciones, activo, disponible, puntosGanados, urlImagenNueva],
+                    (err, rows, fields) => {
+                        if (!err) {
+                            res.status(200).json({
+                                "ok": true,
+                                "mensaje": "Producto actualizado con éxito"
+                            });
+                        } else {
+                            console.log(err);
+                            res.status(500).json({
+                                "ok": false,
+                                "mensaje": "Error al actualizar producto"
+                            });
+                        }
+                    });
+            } else {
+                console.log(err);
+                res.status(500).json({
+                    "ok": false,
+                    "mensaje": "Error al actualizar producto"
+                });
+            }
+        });
     });
+
 
 router.delete('/:id',
     [authJwt.verifyToken,
