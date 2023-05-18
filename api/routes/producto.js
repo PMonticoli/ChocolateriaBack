@@ -81,6 +81,23 @@ router.get('/activos'
                 }
             })
     });
+
+router.get('/activosFiltrados', (req, res) => {
+    const { precioMin, precioMax } = req.query;
+    mysqlConnection.query(
+      'CALL spProductosFiltrados(?, ?)',
+      [precioMin, precioMax],
+      (err, rows, fields) => {
+        if (!err) {
+          res.status(200).json({ "ok": true, "resultado": rows[0] });
+        } else {
+          res.status(500).json({ "ok": false, "mensaje": "Error al listar productos" });
+          console.log(err);
+        }
+      }
+    );
+  });
+  
     
 router.get('/:id',
     [authJwt.verifyToken,
