@@ -88,5 +88,27 @@ router.post('/nuevoUsuarioSocio', (req, res) => {
             }
         });
 });
+router.put('/nuevaClave', (req, res) => {
+    const { usuario, contrasenia } = req.body;
+    mysqlConnection.query('call spRecuperarPassword(?, ?)', [usuario, contrasenia],
+        (err, results) => { 
+            if (!err) {
+                const mensaje = results[0][0].mensaje; 
+                res.status(201).json({
+                    "ok": true,
+                    "mensaje": mensaje 
+                });
+            } else {
+                console.log(err);
+                res.status(500).json({
+                    "ok": false,
+                    "mensaje": "Error al intentar actualizar contraseña"
+                });
+            }
+        });
+});
+
+
+
 
 module.exports = router;
