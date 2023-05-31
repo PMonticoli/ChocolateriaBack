@@ -219,15 +219,14 @@ router.delete('/:id',
             });
     });
 
-    router.post('/cantidadProd',
-    [
+    router.post('/cantidadProd', [
         authJwt.verifyToken,
         authJwt.invalidTokenCheck,
         authJwt.esEmpleado
     ], (req, res) => {
-        const { fechaDesde, fechaHasta } = req.body;
-        mysqlConnection.query('call spReporteCantidadProd(?,?)', 
-        [new Date(fechaDesde), new Date(fechaHasta)],
+        const { fechaDesde, fechaHasta, limite } = req.body;
+        mysqlConnection.query('call spReporteCantidadProd(?,?,?)',
+            [new Date(fechaDesde), new Date(fechaHasta), limite],
             (err, rows, fields) => {
                 if (!err) {
                     res.status(200).json({
@@ -243,34 +242,33 @@ router.delete('/:id',
                     });
                 }
             });
-        
-});
+    });
 
-router.post('/promedioProd',
-[
-    authJwt.verifyToken,
-    authJwt.invalidTokenCheck,
-    authJwt.esEmpleado
-], (req, res) => {
-    const { fechaDesde, fechaHasta } = req.body;
-    mysqlConnection.query('call spReportePromedioProd(?,?)', 
-    [new Date(fechaDesde), new Date(fechaHasta)],
-        (err, rows, fields) => {
-            if (!err) {
-                res.status(200).json({
-                    "ok": true,
-                    "mensaje": "Reporte productos generado con éxito",
-                    "resultado": rows[0]
-                });
-            } else {
-                console.log(err);
-                res.status(500).json({
-                    "ok": false,
-                    "mensaje": "Error al generar reporte productos"
-                });
-            }
-        });
+    router.post('/promedioProd', [
+        authJwt.verifyToken,
+        authJwt.invalidTokenCheck,
+        authJwt.esEmpleado
+    ], (req, res) => {
+        const { fechaDesde, fechaHasta, limite } = req.body;
+        mysqlConnection.query('call spReportePromedioProd(?,?,?)',
+            [new Date(fechaDesde), new Date(fechaHasta), limite],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(200).json({
+                        "ok": true,
+                        "mensaje": "Reporte productos generado con éxito",
+                        "resultado": rows[0]
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al generar reporte productos"
+                    });
+                }
+            });
+    });
     
-});
+    
 
     module.exports = router;
