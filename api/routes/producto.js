@@ -225,7 +225,7 @@ router.delete('/:id',
         authJwt.esEmpleado
     ], (req, res) => {
         const { fechaDesde, fechaHasta, limite } = req.body;
-        mysqlConnection.query('call spReporteCantidadProd(?,?,?)',
+        mysqlConnection.query('call spRankingCantidadProd(?,?,?)',
             [new Date(fechaDesde), new Date(fechaHasta), limite],
             (err, rows, fields) => {
                 if (!err) {
@@ -250,8 +250,59 @@ router.delete('/:id',
         authJwt.esEmpleado
     ], (req, res) => {
         const { fechaDesde, fechaHasta, limite } = req.body;
-        mysqlConnection.query('call spReportePromedioProd(?,?,?)',
+        mysqlConnection.query('call spRankingPromedioProd(?,?,?)',
             [new Date(fechaDesde), new Date(fechaHasta), limite],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(200).json({
+                        "ok": true,
+                        "mensaje": "Reporte productos generado con éxito",
+                        "resultado": rows[0]
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al generar reporte productos"
+                    });
+                }
+            });
+    });
+
+
+    router.post('/reporteCantidad', [
+        authJwt.verifyToken,
+        authJwt.invalidTokenCheck,
+        authJwt.esEmpleado
+    ], (req, res) => {
+        const { fechaDesde, fechaHasta } = req.body;
+        mysqlConnection.query('call spReporteCantidadProd(?,?)',
+            [new Date(fechaDesde), new Date(fechaHasta)],
+            (err, rows, fields) => {
+                if (!err) {
+                    res.status(200).json({
+                        "ok": true,
+                        "mensaje": "Reporte productos generado con éxito",
+                        "resultado": rows[0]
+                    });
+                } else {
+                    console.log(err);
+                    res.status(500).json({
+                        "ok": false,
+                        "mensaje": "Error al generar reporte productos"
+                    });
+                }
+            });
+    });
+
+    router.post('/reportePromedio', [
+        authJwt.verifyToken,
+        authJwt.invalidTokenCheck,
+        authJwt.esEmpleado
+    ], (req, res) => {
+        const { fechaDesde, fechaHasta } = req.body;
+        mysqlConnection.query('call spReportePromedioProd(?,?)',
+            [new Date(fechaDesde), new Date(fechaHasta)],
             (err, rows, fields) => {
                 if (!err) {
                     res.status(200).json({
