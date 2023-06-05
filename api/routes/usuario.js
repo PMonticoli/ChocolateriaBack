@@ -37,31 +37,34 @@ router.get('/rol',
 
 
 router.post('/iniciarSesion', (req, res) => {
-    const { usuario, contrasenia } = req.body;
-    mysqlConnection.query('call spIniciarSesion(?,?)',
-        [usuario, contrasenia],
-        (err, rows, fields) => {
-            rows = rows[0];
+        const { usuario, contrasenia, terminos } = req.body;
+        mysqlConnection.query('CALL spIniciarSesion(?,?,?)', [usuario, contrasenia, terminos], (err, rows, fields) => {
             if (!err) {
-                if (rows.length > 0) {
+                rows = rows[0];
+                if ('mensaje' in rows[0]) {
+                    res.status(200).json({
+                        "ok": false,
+                        "mensaje": rows[0].mensaje
+                    });
+                } else {
                     let data = JSON.stringify(rows[0]);
                     const token = jwt.sign(data, process.env.SECRET_KEY);
                     res.status(200).json({
                         "ok": true,
                         "resultado": [token]
                     });
-                } else {
-                    res.status(200).json({
-                        "ok": false,
-                        "mensaje": "Usuario y/o contraseña incorrectos"
-                    });
                 }
             } else {
                 console.log(err);
+                res.status(500).json({
+                    "ok": false,
+                    "mensaje": "Error en el servidor"
+                });
             }
-        }
-    );
-});
+        });
+    });
+    
+    
 
 router.post('/nuevoUsuarioSocio', (req, res) => {
     const { usuario, contrasenia, dni } = req.body;
