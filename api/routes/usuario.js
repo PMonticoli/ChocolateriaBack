@@ -24,6 +24,7 @@ router.get('/',
                 }
             })
     });
+
 router.get('/rol',
     [
         authJwt.verifyToken,
@@ -34,7 +35,6 @@ router.get('/rol',
             resultado: [req.data.rol]
         });
     });
-
 
 router.post('/iniciarSesion', (req, res) => {
         const { usuario, contrasenia, terminos } = req.body;
@@ -65,7 +65,6 @@ router.post('/iniciarSesion', (req, res) => {
     });
     
     
-
 router.post('/nuevoUsuarioSocio', (req, res) => {
     const { usuario, contrasenia, dni } = req.body;
     mysqlConnection.query('CALL spNuevoUsuarioSocio(?, ?, ?)', [usuario, contrasenia, dni],
