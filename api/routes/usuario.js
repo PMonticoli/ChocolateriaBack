@@ -38,20 +38,24 @@ router.get('/rol',
 
 router.post('/iniciarSesion', (req, res) => {
         const { usuario, contrasenia, terminos } = req.body;
-        mysqlConnection.query('CALL spIniciarSesion(?,?,?)', [usuario, contrasenia, terminos], (err, rows, fields) => {
+        mysqlConnection.query('CALL spIniciarSesion(?,?,?)', 
+        [usuario, contrasenia, terminos], (err, rows, fields) => {
             if (!err) {
                 rows = rows[0];
-                if ('mensaje' in rows[0]) {
+                if (rows[0].mensaje === 'Usuario y/o contraseña incorrectos') {
+                    res.status(200).json({
+                        "ok": false,
+                        "mensaje": rows[0].mensaje
+                    });
+                } else if (rows[0].mensaje === 'Debes aceptar los Términos y condiciones') {
                     res.status(200).json({
                         "ok": false,
                         "mensaje": rows[0].mensaje
                     });
                 } else {
-                    let data = JSON.stringify(rows[0]);
-                    const token = jwt.sign(data, process.env.SECRET_KEY);
                     res.status(200).json({
                         "ok": true,
-                        "resultado": [token]
+                        "resultado": rows[0]
                     });
                 }
             } else {
@@ -63,6 +67,8 @@ router.post('/iniciarSesion', (req, res) => {
             }
         });
     });
+    
+    
     
     
 router.post('/nuevoUsuarioSocio', (req, res) => {
