@@ -53,10 +53,14 @@ router.post('/iniciarSesion', (req, res) => {
                         "mensaje": rows[0].mensaje
                     });
                 } else {
-                    res.status(200).json({
-                        "ok": true,
-                        "resultado": rows[0]
-                    });
+                    if (rows.length > 0) {
+                        let data = JSON.stringify(rows[0]);
+                        const token = jwt.sign(data, process.env.SECRET_KEY);
+                        res.status(200).json({
+                            "ok": true,
+                            "resultado": [token]
+                        });
+                    }
                 }
             } else {
                 console.log(err);
