@@ -97,8 +97,7 @@ router.get('/activosFiltrados', (req, res) => {
       }
     );
   });
-  
-    
+   
 router.get('/:id',
     [authJwt.verifyToken,
     authJwt.invalidTokenCheck,
@@ -320,6 +319,4 @@ router.delete('/:id',
             });
     });
     
-    
-
-    module.exports = router;
+module.exports = router;
