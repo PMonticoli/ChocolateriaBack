@@ -52,6 +52,11 @@ router.post('/iniciarSesion', (req, res) => {
                         "ok": false,
                         "mensaje": rows[0].mensaje
                     });
+                } else if (rows[0].mensaje === 'Usuario dado de baja') {
+                    res.status(200).json({
+                        "ok": false,
+                        "mensaje": rows[0].mensaje
+                    });
                 } else {
                     if (rows.length > 0) {
                         let data = JSON.stringify(rows[0]);
@@ -71,7 +76,51 @@ router.post('/iniciarSesion', (req, res) => {
             }
         });
     });
-    
+
+router.post('/iniciarSesion', (req, res) => {
+    const { usuario, contrasenia, terminos } = req.body;
+    mysqlConnection.query(
+      'CALL spIniciarSesion(?,?,?)',
+      [usuario, contrasenia, terminos],
+      (err, rows, fields) => {
+        if (!err) {
+          const result = rows[0][0];
+          if (result.mensaje === 'Usuario y/o contraseña incorrectos') {
+            res.status(200).json({
+              ok: false,
+              mensaje: result.mensaje,
+            });
+          } else if (
+            result.mensaje === 'Debes aceptar los Términos y condiciones'
+          ) {
+            res.status(200).json({
+              ok: false,
+              mensaje: result.mensaje,
+            });
+          } else if (result.mensaje === 'Usuario dado de baja') {
+            res.status(200).json({
+              ok: false,
+              mensaje: result.mensaje,
+            });
+          } else {
+            const data = JSON.stringify(result);
+            const token = jwt.sign(data, process.env.SECRET_KEY);
+            res.status(200).json({
+              ok: true,
+              resultado: [token],
+            });
+          }
+        } else {
+          console.log(err);
+          res.status(500).json({
+            ok: false,
+            mensaje: 'Error en el servidor',
+          });
+        }
+      }
+    );
+  });
+  
     
 router.post('/nuevoUsuarioSocio', (req, res) => {
     const { usuario, contrasenia, dni } = req.body;
