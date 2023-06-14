@@ -73,8 +73,6 @@ router.post('/iniciarSesion', (req, res) => {
     });
     
     
-    
-    
 router.post('/nuevoUsuarioSocio', (req, res) => {
     const { usuario, contrasenia, dni } = req.body;
     mysqlConnection.query('CALL spNuevoUsuarioSocio(?, ?, ?)', [usuario, contrasenia, dni],
@@ -127,6 +125,37 @@ router.put('/nuevaClave', (req, res) => {
             });
         }
     });
+});
+
+router.delete('/:id',
+[authJwt.verifyToken,
+authJwt.invalidTokenCheck,
+authJwt.checkIdSocio],
+(req, res) => {
+    mysqlConnection.query('call spDarDeBajaUsuario(?,@status); select @status as status;', [req.params['id']],
+        (err, rows, fields) => {
+            if (!err) {
+                const status = rows[1][0].status;
+                if (status == 1) {
+                    res.status(200).json({
+                        "ok": true,
+                        "mensaje": "Usuario dado de baja con éxito"
+                    });
+                } else if (status == 0) {
+                    res.status(404).json({
+                        "ok": false,
+                        "mensaje": `No se encontró al usuario con id ${req.params['id']}`
+                    });
+                }
+
+            } else {
+                console.log(err);
+                res.status(500).json({
+                    "ok": false,
+                    "mensaje": "Error al intentar dar de baja al usuario"
+                });
+            }
+        })
 });
 
 
