@@ -44,7 +44,7 @@ esEmpleado = async (req, res, next) => {
 };
 
 checkIdSocio = async (req, res, next) => {
-    if (req.data.rol === 'Admin' || req.data.idSocio == req.params['id']){
+    if (req.data.rol === 'Admin' || req.data.rol === 'Empleado' || req.data.idSocio == req.params['id']){
         return next();
     } else {
         res.status(403).json({ "ok": false, "mensaje": "Usted no tiene los permisos requeridos para acceder a este recurso." });
